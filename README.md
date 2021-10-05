@@ -10,9 +10,9 @@ http://cs.gmu.edu/~white/CS540/Examples/
 
 ## Compilation and Run Example
 ### Linux/Unix
-user:~/.../start_java>*make*
-user:~/.../start_java>*java p2_java <test1.tog >out1.txt 2>err1.txt*
+user:\~/.../start_java>**make**  
+user:\~/.../start_java>**java p2_java <test1.tog >out1.txt 2>err1.txt**  
 ### Windows
-C:\...\start_java>*java -jar jflex-full-1.7.0.jar p2_java.l*
-C:\...\start_java>*javac lexer.java*
-C:\...\start_java>*java lexer*
+C:\\...\\start_java>**java -jar jflex-full-1.7.0.jar p2_java.l**  
+C:\\...\\start_java>**javac lexer.java**  
+C:\\...\\start_java>**java lexer**
