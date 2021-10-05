@@ -1,0 +1,6 @@
+//a test case with variables
+let  //start
+  var x:=1  //variable with init value
+in  // done with declarations
+  printint(x)  //statements
+end //last comment!
