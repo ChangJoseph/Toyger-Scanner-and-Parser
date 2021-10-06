@@ -235,7 +235,7 @@ static final int LET=2;  /* example token for keyword let */
 
 public static void main(String [] args) throws IOException 
 {
-	lexer lex = new p1_java(new InputStreamReader(System.in));
+	lexer lex = new lexer(new InputStreamReader(System.in));
     lex.yylex(); 
 }
 

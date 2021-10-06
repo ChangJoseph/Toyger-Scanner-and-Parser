@@ -50,12 +50,12 @@ public static void main(String [] args) throws IOException
 
  /* TODO check regex */
 keyword = let|in|end|var|function|printint|printstring|getint|return|if|then|else|for|to|do|int|string|void
-punctuation = (|)|:|,|=|;
-operator = :=|+|-|*|/|==|<|<=|>|>=|<>
+punctuation = \(|\)|:|,|=|;
+operator = :=|\+|-|\*|\/|==|<|<=|>|>=|<>
 id = [A-Za-z0-9][_A-Za-z0-9]
 number = [1-9][0-9]*
-string = "[(\")^"]"
-comment = //[^\n]*
+string = \"((\\\")|[^\n\"])*\"
+comment = \/\/[^\n]*
 
 %% 
 
