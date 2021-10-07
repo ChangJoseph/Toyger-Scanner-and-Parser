@@ -35,10 +35,34 @@ static final int EOLN=100;
 
 /* additional definitions here */
 
-public static void main(String [] args) throws IOException 
-{
-	lexer lex = new lexer(new InputStreamReader(System.in));
-    lex.yylex();
+public static int lookahead;
+public static lexer lex = new lexer(new InputStreamReader(System.in));
+
+public static void start() {
+	if (lookahead == 1) {
+		// match(token); nextState();
+	}
+	else if (lookahead == 2) {
+		
+	}
+	else {
+		syntax_error();
+	}
+}
+
+public static void main(String [] args) throws IOException {
+	lookahead = lex.yylex();
+	start();
+	if (lookahead == EOLN) {
+		return; // Accept state
+	}
+	else {
+		syntax_error();
+	}
+}
+
+public static void syntax_error() {
+	System.err.printf(lexical_err_msg,lex.yyline);
 }
 
 %} 
