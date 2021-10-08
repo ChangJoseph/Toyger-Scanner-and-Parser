@@ -175,8 +175,11 @@ public static void var_dec_2() throws IOException { // D`
 	}
 	else syntax_error();
 }
+public static boolean firstType() { // first(E)
+	return (lookahead == INT_TOKEN || lookahead == STRING_TOKEN || lookahead == VOID_TOKEN);
+}
 public static void type() throws IOException { // E
-	if (lookahead == INT_TOKEN || lookahead == STRING_TOKEN || lookahead == VOID_TOKEN) {
+	if (firstType()) {
 		match(lookahead);
 	}
 	else syntax_error();
@@ -205,7 +208,7 @@ public static void function_dec_2() throws IOException { // F`
 			match(lookahead);
 			if (lookahead == COLON_TOKEN) {
 				match(lookahead);
-				if (lookahead == INT_TOKEN || lookahead == STRING_TOKEN || lookahead == VOID_TOKEN) {
+				if (firstType()) {
 					type(); // E
 					if (lookahead == EQUAL_TOKEN) {
 						match(lookahead);
@@ -231,7 +234,7 @@ public static void function_dec_2() throws IOException { // F`
 			match(lookahead);
 			if (lookahead == COLON_TOKEN) {
 				match(lookahead);
-				if (lookahead == INT_TOKEN || lookahead == STRING_TOKEN || lookahead == VOID_TOKEN) {
+				if (firstType()) {
 					type(); // E
 					if (lookahead == EQUAL_TOKEN) {
 						match(lookahead);
@@ -287,7 +290,7 @@ public static void parameter() throws IOException { // H
 		match(lookahead);
 		if (lookahead == COLON_TOKEN) {
 			match(lookahead);
-			if (lookahead == INT_TOKEN || lookahead == STRING_TOKEN || lookahead == VOID_TOKEN) {
+			if (firstType()) {
 				type(); // E
 			}
 			else syntax_error();
@@ -297,13 +300,87 @@ public static void parameter() throws IOException { // H
 	else syntax_error();
 }
 public static void statements() throws IOException { // I
-
+	if (lookahead == ID) {
+		statement(); // J
+		if (lookahead == SEMI_COLON_TOKEN) {
+			statements_2(); // I`
+		}
+		else syntax_error();
+	}
+	else syntax_error();
 }
 public static void statements_2() throws IOException { // I`
-
+	if (lookahead == SEMI_COLON_TOKEN) {
+		match(lookahead);
+		if (lookahead == ID) {
+			statement(); // J
+			if (lookahead == SEMI_COLON_TOKEN) {
+				statements_2(); // I`
+			}
+			else syntax_error();
+		}
+		else syntax_error();
+	}
+	else return; // epsilon
 }
 public static void statement() throws IOException { // J
-
+	if (lookahead == ID) {
+		globalVarAdd();
+		match(lookahead);
+		if (lookahead == ASSIGNMENT_TOKEN) {
+			match(lookahead);
+			if (firstFactor() || lookahead == GETINT_TOKEN) {
+				statement_2(); // J`
+			}
+			else syntax_error();
+		}
+		else if (lookahead == LEFT_PARENTHESIS_TOKEN) {
+			match(lookahead);
+			if (lookahead == RIGHT_PARENTHESIS_TOKEN || firstFactor()) {
+				statement_3(); // J``
+			}
+			else syntax_error();
+		}
+		else syntax_error();
+	}
+	else if (lookahead == RETURN_TOKEN) {
+		match(lookahead);
+		if (firstFactor()) {
+			statement_4(); // J```
+		}
+		else return;
+	}
+	else if (lookahead == PRINTINT_TOKEN) {
+		match(lookahead);
+		if (lookahead == LEFT_PARENTHESIS_TOKEN) {
+			match(lookahead);
+			if (firstFactor()) {
+				expr(); // K
+				if (lookahead == RIGHT_PARENTHESIS_TOKEN) {
+					match(lookahead);
+				}
+				else syntax_error();
+			}
+			else syntax_error();
+		}
+		else syntax_error();
+	}
+	else if (lookahead == PRINTSTRING_TOKEN) {
+		match(lookahead);
+		if (lookahead == LEFT_PARENTHESIS_TOKEN) {
+			match(lookahead);
+			if (firstFactor()) {
+				expr(); // K
+				if (lookahead == RIGHT_PARENTHESIS_TOKEN) {
+					match(lookahead);
+				}
+				else syntax_error();
+			}
+			else syntax_error();
+		}
+		else syntax_error();
+	}
+	else syntax_error();
 }
 public static void statement_2() throws IOException { // J`
 
@@ -325,6 +402,9 @@ public static void term() throws IOException { // L
 }
 public static void term_2() throws IOException { // L`
 
+}
+public static boolean firstFactor() { // first(M)
+	return (lookahead == LEFT_PARENTHESIS_TOKEN || lookahead == NUMBER || lookahead == STRING_LITERAL || lookahead == ID);
 }
 public static void factor() throws IOException { // M
 
@@ -377,7 +457,7 @@ comment = \/\/[^\n]*
 
 printstring		{return(PRINTSTRING_TOKEN);}
 printint		{return(PRINTINT_TOKEN);}
-function		{return(FUNCTION_TOKEN);}
+function		{num_functions++;return(FUNCTION_TOKEN);}
 return			{return(RETURN_TOKEN);}
 getint			{return(GETINT_TOKEN);}
 string			{return(STRING_TOKEN);}
@@ -395,8 +475,8 @@ do				{return(DO_TOKEN);}
 to				{return(TO_TOKEN);}
 {id}			{return(ID);}
 {number}		{return(NUMBER);}
-{string}		{return(STRING_LITERAL);}
-{comment}		{return(COMMENT);}
+{string}		{num_strings++;return(STRING_LITERAL);}
+{comment}		{num_comments++;}
 :=				{return(ASSIGNMENT_TOKEN);}
 ==				{return(EQUALITY_TOKEN);}
 :				{return(COLON_TOKEN);}
