@@ -200,7 +200,7 @@ public static void function_dec() throws IOException { // F
 public static void function_dec_2() throws IOException { // F`
 	if (lookahead == ID) {
 		globalVarAdd();
-		parameters() // G
+		parameters(); // G
 		if (lookahead == RIGHT_PARENTHESIS_TOKEN) {
 			match(lookahead);
 			if (lookahead == COLON_TOKEN) {
@@ -256,13 +256,45 @@ public static void function_dec_2() throws IOException { // F`
 	parameters();
 }
 public static void parameters() throws IOException { // G
-
+	if (lookahead == ID) {
+		parameter(); // H
+		if (lookahead == SEMI_COLON_TOKEN) {
+			parameters_2(); // G`
+		}
+		else syntax_error();
+	}
+	else syntax_error();
 }
 public static void parameters_2() throws IOException { // G`
-
+	if (lookahead == SEMI_COLON_TOKEN) {
+		match(lookahead);
+		if (lookahead == ID) {
+			parameter(); // H
+			if (lookahead == SEMI_COLON_TOKEN) {
+				parameters_2(); // G`
+			}
+			else syntax_error();
+		}
+		else syntax_error();
+	}
+	else {
+		return; // epsilon
+	}
 }
 public static void parameter() throws IOException { // H
-
+	if (lookahead == ID) {
+		globalVarAdd();
+		match(lookahead);
+		if (lookahead == COLON_TOKEN) {
+			match(lookahead);
+			if (lookahead == INT_TOKEN || lookahead == STRING_TOKEN || lookahead == VOID_TOKEN) {
+				type(); // E
+			}
+			else syntax_error();
+		}
+		else syntax_error();
+	}
+	else syntax_error();
 }
 public static void statements() throws IOException { // I
 
