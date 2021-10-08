@@ -383,13 +383,40 @@ public static void statement() throws IOException { // J
 	else syntax_error();
 }
 public static void statement_2() throws IOException { // J`
-
+	if (lookahead == GETINT_TOKEN) {
+		match(lookahead);
+		if (lookahead == LEFT_PARENTHESIS_TOKEN) {
+			match(lookahead);
+			if (lookahead == RIGHT_PARENTHESIS_TOKEN) {
+				match(lookahead);
+			}
+			else syntax_error();
+		}
+		else syntax_error();
+	}
+	else if (firstFactor()) {
+		expr(); // K
+	}
+	else syntax_error();
 }
 public static void statement_3() throws IOException { // J``
-
+	if (lookahead == RIGHT_PARENTHESIS_TOKEN) {
+		match(lookahead);
+	}
+	else if (firstFactor()) {
+		expr_list(); // N
+		if (lookahead == RIGHT_PARENTHESIS_TOKEN) {
+			match(lookahead);
+		}
+		else syntax_error();
+	}
+	else syntax_error();
 }
 public static void statement_4() throws IOException { // J```
-
+	if (firstFactor()) {
+		expr(); // K
+	}
+	else return; // epsilon
 }
 public static void expr() throws IOException { // K
 
