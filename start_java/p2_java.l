@@ -524,17 +524,18 @@ public static void main(String [] args) throws IOException {
 	for (GlobalVariable var_elem : variable_list) {
 		System.out.printf("Global Variable %s: line %d\n",var_elem.var_id,var_elem.line_num);
 	}
-	System.out.printf("\nNumber of functions defined: %d\n",num_functions);
+	if (variable_list.size() > 0) System.out.print("\n");
+	System.out.printf("Number of functions defined: %d\n",num_functions);
 	System.out.printf("Number of comments: %d\n",num_comments);
 	System.out.printf("Number of strings: %d\n",num_strings);
 
-	System.out.println("\n\nDEBUG: number spaces: " + num_spaces);
-	System.out.println("DEBUG: number skips: " + num_skips);
+	// System.out.println("\n\nDEBUG: number spaces: " + num_spaces);
+	// System.out.println("DEBUG: number skips: " + num_skips);
 }
 
 public static void syntax_error() {
 	System.err.printf(lexical_err_msg,lex.yyline+1);
-	System.err.printf("COLUMN: %d",lex.yycolumn);
+	// System.err.printf("COLUMN: %d",lex.yycolumn);
 	System.exit(1);
 }
 
