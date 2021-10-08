@@ -539,6 +539,15 @@ public static void main(String [] args) throws IOException {
 	else {
 		syntax_error();
 	}
+	for (GlobalVariable var_elem : variable_list) {
+		System.out.printf("Global Variable %s: line %i\n",var_elem.var_id,var_elem.line_num);
+	}
+	System.out.printf("\nNumber of functions defined: %i\n",num_functions)
+	System.out.printf("Number of comments: %i\n",num_comments)
+	System.out.printf("Number of strings: %i\n",num_strings)
+
+	System.out.println("DEBUG: number spaces: " + num_spaces);
+	System.out.println("DEBUG: number skips: " + num_skips);
 }
 
 public static void syntax_error() {
