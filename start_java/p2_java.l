@@ -1,4 +1,5 @@
 import java.io.*; 
+import java.util.ArrayList;
 
  /* lex comments: cannot start with the leftmost location of a line */
  /* addtional imports/ declarations here */
@@ -18,6 +19,7 @@ import java.io.*;
 static String lexical_err_msg = "Lexical Error: line %d\n";
 
 /* Self-defined tokens */
+static final int EOF=0;
 static final int TOKEN=1;  /* dummy token type */
 /* Keywords */
 static final int LET_TOKEN=2;
@@ -66,112 +68,206 @@ static final int NUMBER=38; /* ### */
 static final int STRING_LITERAL=39; /* "abc" */
 static final int COMMENT=40; /* // comment */
 /* End of line */
-static final int EOLN=0;
+static final int EOLN=100;
 
 /* additional definitions here */
-
 public static int lookahead;
 public static lexer lex = new lexer(new InputStreamReader(System.in));
 
-public static void look() throws IOException {
-	lookahead = lex.yylex();
-} 
-public static void start() throws IOException {
-	look();
-	if (lookahead == LET_TOKEN) {
-		decs();
-		// in
-		statements();
-		// end
+/* Program Report variables */
+public static ArrayList<GlobalVariable> variable_list = new ArrayList<GlobalVariable>();
+public static int num_functions=0;
+public static int num_comments=0;
+public static int num_strings=0;
+/* Extra debug variables */
+public static int num_spaces=0;
+public static int num_skips=0;
+
+public static class GlobalVariable {
+	public String var_id;
+	public int line_num;
+	public GlobalVariable(String v, int l) {
+		var_id = v;
+		line_num = l;
 	}
-	else if (lookahead == 2) {
-		
+}
+
+public static int look() throws IOException {
+	lookahead = lex.yylex();
+	return lookahead;
+}
+public static void match(int symbol) throws IOException {
+	if (lookahead == symbol) {
+		look();
 	}
 	else {
 		syntax_error();
 	}
 }
-public static void decs() throws IOException {
+
+public static void start() throws IOException {
+	if (lookahead == LET_TOKEN) {
+		match(lookahead);
+		decs(); // B
+		// in
+		if (lookahead == IN_TOKEN) {
+			match(lookahead);
+		}
+		else {
+			syntax_error();
+		}
+		statements(); // I
+		// end
+		if (lookahead == END_TOKEN) {
+			match(lookahead);
+		}
+		else {
+			syntax_error();
+		}
+	}
+	else {
+		syntax_error();
+	}
+}
+public static void decs() throws IOException { // B
+	if (lookahead == VAR_TOKEN || lookahead == FUNCTION_TOKEN) {
+		dec(); // C
+		decs(); // B
+	}
+	// else if (lookahead == EOLN) {
+	// 	match(lookahead);
+	// }
+	else {
+		return; // epsilon
+	}
+}
+public static void dec() throws IOException { // C
+	if (lookahead == VAR_TOKEN) {
+		var_dec(); // D
+	}
+	else if (lookahead == FUNCTION_TOKEN) {
+		function_dec(); // F
+	}
+	else {
+		syntax_error();
+	}
+}
+public static void var_dec() throws IOException { // D
+	if (lookahead == VAR_TOKEN) {
+		match(lookahead);
+		if (lookahead == ID) {
+			variable_list.add(new GlobalVariable(lex.yytext(),lex.yyline)); // TODO check if lex.* funcs work
+			match(lookahead);
+			if (lookahead == ASSIGNMENT_TOKEN) {
+				var_dec_2();
+			}
+			else if (lookahead == COLON_TOKEN) {
+				var_dec_2();
+			}
+			else {
+				syntax_error();
+			}
+		}
+		else {
+			syntax_error();
+		}
+	}
+	else {
+		syntax_error();
+	}
+}
+public static void var_dec_2() throws IOException { // D`
+	if (lookahead == ASSIGNMENT_TOKEN) {
+		match(lookahead);
+		expr();
+	}
+	else if (lookahead == COLON_TOKEN) {
+		match(lookahead);
+		type();
+	}
+}
+public static void type() throws IOException { // E
+	if (lookahead == INT_TOKEN || lookahead == STRING_TOKEN || lookahead == VOID_TOKEN) {
+		match(lookahead);
+	}
+	else {
+		syntax_error();
+	}
+}
+public static void function_dec() throws IOException { // F
 
 }
-public static void dec() throws IOException {
+public static void function_dec_2() throws IOException { // F`
 
 }
-public static void var_dec() throws IOException {
+public static void parameters() throws IOException { // G
 
 }
-public static void var_dec_2() throws IOException {
+public static void parameters_2() throws IOException { // G`
 
 }
-public static void type() throws IOException {
+public static void parameter() throws IOException { // H
 
 }
-public static void function_dec() throws IOException {
+public static void statements() throws IOException { // I
 
 }
-public static void function_dec_2() throws IOException {
+public static void statements_2() throws IOException { // I`
 
 }
-public static void parameters() throws IOException {
+public static void statement() throws IOException { // J
 
 }
-public static void parameters_2() throws IOException {
+public static void statement_2() throws IOException { // J`
 
 }
-public static void parameter() throws IOException {
+public static void statement_3() throws IOException { // J``
 
 }
-public static void statements() throws IOException {
+public static void statement_4() throws IOException { // J```
 
 }
-public static void statements_2() throws IOException {
+public static void expr() throws IOException { // K
 
 }
-public static void statement() throws IOException {
+public static void expr_2() throws IOException { // K`
 
 }
-public static void statement_2() throws IOException {
+public static void term() throws IOException { // L
 
 }
-public static void statement_3() throws IOException {
+public static void term_2() throws IOException { // L`
 
 }
-public static void statement_4() throws IOException {
+public static void factor() throws IOException { // M
 
 }
-public static void expr() throws IOException {
+public static void factor_2() throws IOException { // M`
 
 }
-public static void expr_2() throws IOException {
+public static void expr_list() throws IOException { // N
 
 }
-public static void term() throws IOException {
-
-}
-public static void term_2() throws IOException {
-
-}
-public static void factor() throws IOException {
-
-}
-public static void factor_2() throws IOException {
-
-}
-public static void expr_list() throws IOException {
-
-}
-public static void expr_list_2() throws IOException {
+public static void expr_list_2() throws IOException { // N`
 
 }
 
 
 
 public static void main(String [] args) throws IOException {
+	look();
 	start();
+	if (lookahead == EOF) {
+		System.err.println("Input Accepted");
+	}
+	else {
+		syntax_error();
+	}
 }
 
 public static void syntax_error() {
 	System.err.printf(lexical_err_msg,lex.yyline);
+	System.exit(1);
 }
 
 %} 
@@ -233,7 +329,8 @@ to				{return(TO_TOKEN);}
 >				{return(GREATER_THAN_TOKEN);}
 
 \r|\n|\r\n		{return(EOLN);}
-.				{;}
+" "				{num_spaces++;}
+.				{num_skips++;}
 
  
 	/* copy from input to output */
