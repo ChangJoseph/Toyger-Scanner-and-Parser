@@ -1,5 +1,7 @@
 **/.vs
 ./cs440_p2.pdf
-start_java/lexer.class
-start_java/lexer.java
-**/.docx
+**/*.class
+**/*.java
+**/*.java~
+**/*old*
+**/*.docx

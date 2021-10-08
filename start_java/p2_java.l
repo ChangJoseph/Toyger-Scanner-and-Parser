@@ -20,26 +20,29 @@ static String lexical_err_msg = "Lexical Error: line %d\n";
 /* Self-defined tokens */
 static final int TOKEN=1;  /* dummy token type */
 /* Keywords */
-static final int KEYWORD=2;
+static final int KEYWORD=2; /* let|in|end|var|etc... */
 /* Punctuation */
-static final int PUNCTUATION=3;
+static final int PUNCTUATION=3; /* \(|\)|:|,|=|; */
 /* Operator */
-static final int OPERATOR=4;
+static final int OPERATOR=4; /* :=|\+|-|\*|\/|==|<|<=|>|>=|<> */
 /* Variable Lines */
-static final int ID=5;
-static final int NUMBER=6;
-static final int STRING_LITERAL=7;
-static final int COMMENT=8;
+static final int ID=5; /* \w or a-z, A-Z, 0-9 */
+static final int NUMBER=6; /* ### */
+static final int STRING_LITERAL=7; /* "abc" */
+static final int COMMENT=8; /* // comment */
 /* End of line */
 static final int EOLN=100;
 
 /* additional definitions here */
 
 public static int lookahead;
+public static String lookaheadStr;
 public static lexer lex = new lexer(new InputStreamReader(System.in));
 
 public static void start() {
-	if (lookahead == 1) {
+	lookahead = lex.yylex();
+
+	if (lookahead == 2) {
 		// match(token); nextState();
 	}
 	else if (lookahead == 2) {
@@ -51,7 +54,6 @@ public static void start() {
 }
 
 public static void main(String [] args) throws IOException {
-	lookahead = lex.yylex();
 	start();
 	if (lookahead == EOLN) {
 		return; // Accept state
@@ -83,13 +85,13 @@ comment = \/\/[^\n]*
 
 %% 
 
-{keyword}		{return(KEYWORD);}
-{punctuation}	{return(PUNCTUATION);}
-{operator}		{return(OPERATOR);}
-{id}			{return(ID);}
-{number}		{return(NUMBER);}
-{string}		{return(STRING_LITERAL);}
-{comment}		{return(COMMENT);}
+{keyword}		{lookaheadStr=yytext();return(KEYWORD);}
+{punctuation}	{lookaheadStr=yytext();return(PUNCTUATION);}
+{operator}		{lookaheadStr=yytext();return(OPERATOR);}
+{id}			{lookaheadStr=yytext();return(ID);}
+{number}		{lookaheadStr=yytext();return(NUMBER);}
+{string}		{lookaheadStr=yytext();return(STRING_LITERAL);}
+{comment}		{lookaheadStr=yytext();return(COMMENT);}
 
 \r|\n|\r\n		{return(EOLN);}
 .				{;}
