@@ -203,7 +203,6 @@ public static void function_dec_2() throws IOException { // F`
 	if (lookahead == ID) {
 		parameters(); // G
 		if (lookahead == RIGHT_PARENTHESIS_TOKEN) {
-			System.out.print("\nDEBUG BREAKPOINT 1\n"); // TODO
 			match(lookahead);
 			if (lookahead == COLON_TOKEN) {
 				match(lookahead);
