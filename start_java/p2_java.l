@@ -100,9 +100,13 @@ public static void match(int symbol) throws IOException {
 	if (lookahead == symbol) {
 		look();
 	}
-	else {
-		syntax_error();
-	}
+	else syntax_error();
+}
+public static void globalVarAdd() {
+	globalVarAdd(lex.yytext(),lex.yyline); // TODO check if lex.* funcs work
+}
+public static void globalVarAdd(String v, int l) {
+	variable_list.add(new GlobalVariable(v,l));
 }
 
 public static void start() throws IOException {
@@ -113,21 +117,15 @@ public static void start() throws IOException {
 		if (lookahead == IN_TOKEN) {
 			match(lookahead);
 		}
-		else {
-			syntax_error();
-		}
+		else syntax_error();
 		statements(); // I
 		// end
 		if (lookahead == END_TOKEN) {
 			match(lookahead);
 		}
-		else {
-			syntax_error();
-		}
+		else syntax_error();
 	}
-	else {
-		syntax_error();
-	}
+	else syntax_error();
 }
 public static void decs() throws IOException { // B
 	if (lookahead == VAR_TOKEN || lookahead == FUNCTION_TOKEN) {
@@ -137,9 +135,7 @@ public static void decs() throws IOException { // B
 	// else if (lookahead == EOLN) {
 	// 	match(lookahead);
 	// }
-	else {
-		return; // epsilon
-	}
+	else return; // epsilon
 }
 public static void dec() throws IOException { // C
 	if (lookahead == VAR_TOKEN) {
@@ -148,57 +144,116 @@ public static void dec() throws IOException { // C
 	else if (lookahead == FUNCTION_TOKEN) {
 		function_dec(); // F
 	}
-	else {
-		syntax_error();
-	}
+	else syntax_error();
 }
 public static void var_dec() throws IOException { // D
 	if (lookahead == VAR_TOKEN) {
 		match(lookahead);
 		if (lookahead == ID) {
-			variable_list.add(new GlobalVariable(lex.yytext(),lex.yyline)); // TODO check if lex.* funcs work
+			globalVarAdd();
 			match(lookahead);
 			if (lookahead == ASSIGNMENT_TOKEN) {
-				var_dec_2();
+				var_dec_2(); // D`
 			}
 			else if (lookahead == COLON_TOKEN) {
-				var_dec_2();
+				var_dec_2(); // D`
 			}
-			else {
-				syntax_error();
-			}
+			else syntax_error();
 		}
-		else {
-			syntax_error();
-		}
+		else syntax_error();
 	}
-	else {
-		syntax_error();
-	}
+	else syntax_error();
 }
 public static void var_dec_2() throws IOException { // D`
 	if (lookahead == ASSIGNMENT_TOKEN) {
 		match(lookahead);
-		expr();
+		expr(); // K
 	}
 	else if (lookahead == COLON_TOKEN) {
 		match(lookahead);
-		type();
+		type(); // E
 	}
+	else syntax_error();
 }
 public static void type() throws IOException { // E
 	if (lookahead == INT_TOKEN || lookahead == STRING_TOKEN || lookahead == VOID_TOKEN) {
 		match(lookahead);
 	}
-	else {
-		syntax_error();
-	}
+	else syntax_error();
 }
 public static void function_dec() throws IOException { // F
-
+	if (lookahead == FUNCTION_TOKEN) {
+		match(lookahead);
+		if (lookahead == ID) {
+			globalVarAdd();
+			match(lookahead);
+			if (lookahead == LEFT_PARENTHESIS_TOKEN) {
+				match(lookahead);
+				function_dec_2();
+			}
+			else syntax_error();
+		}
+		else syntax_error();
+	}
+	else syntax_error();
 }
 public static void function_dec_2() throws IOException { // F`
-
+	if (lookahead == ID) {
+		globalVarAdd();
+		match(lookahead);
+		if (lookahead == RIGHT_PARENTHESIS_TOKEN) {
+			match(lookahead);
+			if (lookahead == COLON_TOKEN) {
+				match(lookahead);
+				if (lookahead == INT_TOKEN || lookahead == STRING_TOKEN || lookahead == VOID_TOKEN) {
+					type(); // E
+					if (lookahead == EQUAL_TOKEN) {
+						match(lookahead);
+						if (lookahead == ID) {
+							statements(); // I
+							if (lookahead == END_TOKEN) {
+								match(lookahead);
+							}
+							else syntax_error();
+						}
+						else syntax_error();
+					}
+					else syntax_error();
+				}
+				else syntax_error();
+			}
+			else syntax_error();
+		}
+		else syntax_error();
+	}
+	else if (lookahead == RIGHT_PARENTHESIS_TOKEN) {
+		if (lookahead == RIGHT_PARENTHESIS_TOKEN) {
+			match(lookahead);
+			if (lookahead == COLON_TOKEN) {
+				match(lookahead);
+				if (lookahead == INT_TOKEN || lookahead == STRING_TOKEN || lookahead == VOID_TOKEN) {
+					type(); // E
+					if (lookahead == EQUAL_TOKEN) {
+						match(lookahead);
+						if (lookahead == ID) {
+							statements(); // I
+							if (lookahead == END_TOKEN) {
+								match(lookahead);
+							}
+							else syntax_error();
+						}
+						else syntax_error();
+					}
+					else syntax_error();
+				}
+				else syntax_error();
+			}
+			else syntax_error();
+		}
+		else syntax_error();
+	}
+	else syntax_error();
+	parameters();
 }
 public static void parameters() throws IOException { // G
 
