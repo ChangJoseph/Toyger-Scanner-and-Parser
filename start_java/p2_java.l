@@ -66,17 +66,23 @@ static final int NUMBER=38; /* ### */
 static final int STRING_LITERAL=39; /* "abc" */
 static final int COMMENT=40; /* // comment */
 /* End of line */
-static final int EOLN=100;
+static final int EOLN=0;
 
 /* additional definitions here */
 
 public static int lookahead;
 public static lexer lex = new lexer(new InputStreamReader(System.in));
 
-
-public static void start() {
-	if (lookahead == 2) {
-		// match(token); nextState();
+public static void look() throws IOException {
+	lookahead = lex.yylex();
+} 
+public static void start() throws IOException {
+	look();
+	if (lookahead == LET_TOKEN) {
+		decs();
+		// in
+		statements();
+		// end
 	}
 	else if (lookahead == 2) {
 		
@@ -85,88 +91,83 @@ public static void start() {
 		syntax_error();
 	}
 }
-public static void decs() {
+public static void decs() throws IOException {
 
 }
-public static void dec() {
+public static void dec() throws IOException {
 
 }
-public static void var_dec() {
+public static void var_dec() throws IOException {
 
 }
-public static void var_dec_2() {
+public static void var_dec_2() throws IOException {
 
 }
-public static void type() {
+public static void type() throws IOException {
 
 }
-public static void function_dec() {
+public static void function_dec() throws IOException {
 
 }
-public static void function_dec_2() {
+public static void function_dec_2() throws IOException {
 
 }
-public static void parameters() {
+public static void parameters() throws IOException {
 
 }
-public static void parameters_2() {
+public static void parameters_2() throws IOException {
 
 }
-public static void parameter() {
+public static void parameter() throws IOException {
 
 }
-public static void statements() {
+public static void statements() throws IOException {
 
 }
-public static void statements_2() {
+public static void statements_2() throws IOException {
 
 }
-public static void statement() {
+public static void statement() throws IOException {
 
 }
-public static void statement_2() {
+public static void statement_2() throws IOException {
 
 }
-public static void statement_3() {
+public static void statement_3() throws IOException {
 
 }
-public static void statement_4() {
+public static void statement_4() throws IOException {
 
 }
-public static void expr() {
+public static void expr() throws IOException {
 
 }
-public static void expr_2() {
+public static void expr_2() throws IOException {
 
 }
-public static void term() {
+public static void term() throws IOException {
 
 }
-public static void term_2() {
+public static void term_2() throws IOException {
 
 }
-public static void factor() {
+public static void factor() throws IOException {
 
 }
-public static void factor_2() {
+public static void factor_2() throws IOException {
 
 }
-public static void expr_list() {
+public static void expr_list() throws IOException {
 
 }
-public static void expr_list_2() {
+public static void expr_list_2() throws IOException {
 
 }
 
 
 
 public static void main(String [] args) throws IOException {
-	lookahead = lex.yylex();
 	start();
-	while ((lookahead) != EOLN) {
-		
-		lookahead = lex.yylex();
-	}
 }
 
 public static void syntax_error() {
@@ -184,52 +185,52 @@ public static void syntax_error() {
 // keyword = let|in|end|var|function|printint|printstring|getint|return|if|then|else|for|to|do|int|string|void
 // punctuation = \(|\)|:|,|=|;
 // operator = :=|\+|-|\*|\/|==|<|<=|>|>=|<>
-// id = [A-Za-z0-9][_A-Za-z0-9]
-// number = [1-9][0-9]*
-// string = \"((\\\")|[^\n\"])*\"
-// comment = \/\/[^\n]*
+id = [A-Za-z0-9][_A-Za-z0-9]
+number = [1-9][0-9]*
+string = \"((\\\")|[^\n\"])*\"
+comment = \/\/[^\n]*
 
 %% 
 
-printstring					{return(PRINTSTRING_TOKEN);}
-printint					{return(PRINTINT_TOKEN);}
-function					{return(FUNCTION_TOKEN);}
-return						{return(RETURN_TOKEN);}
-getint						{return(GETINT_TOKEN);}
-string						{return(STRING_TOKEN);}
-void						{return(VOID_TOKEN);}
-else						{return(ELSE_TOKEN);}
-then						{return(THEN_TOKEN);}
-let							{return(LET_TOKEN);}
-end							{return(END_TOKEN);}
-var							{return(VAR_TOKEN);}
-for							{return(FOR_TOKEN);}
-int							{return(INT_TOKEN);}
-in							{return(IN_TOKEN);}
-if							{return(IF_TOKEN);}
-do							{return(DO_TOKEN);}
-to							{return(TO_TOKEN);}
-[A-Za-z0-9][_A-Za-z0-9]		{return(IDENTIFIER_TOKEN);}
-[1-9][0-9]*					{return(NUMBERS_TOKEN);}
-"[(\")^"]"					{return(STRINGS_TOKEN);}
-//[^\n]*					{return(COMMENTS_TOKEN);}
-:=							{return(ASSIGNMENT_TOKEN);}
-==							{return(EQUALITY_TOKEN);}
-:							{return(COLON_TOKEN);}
-=							{return(EQUAL_TOKEN);}
-(							{return(LEFT_PARENTHESIS_TOKEN);}
-)							{return(RIGHT_PARENTHESIS_TOKEN);}
-,							{return(COMMA_TOKEN);}
-;							{return(SEMI_COLON_TOKEN);}
-+							{return(PLUS_TOKEN);}
--							{return(MINUS_TOKEN);}
-*							{return(MULTIPLY_TOKEN);}
-/							{return(DIVISOR_TOKEN);}
-<=							{return(LESS_EQUAL_TOKEN);}
-<>							{return(NOT_EQUAL_TOKEN);}
-<							{return(LESS_THAN_TOKEN);}
->=							{return(GREATER_EQUAL_TOKEN);}
->							{return(GREATER_THAN_TOKEN);}
+printstring		{return(PRINTSTRING_TOKEN);}
+printint		{return(PRINTINT_TOKEN);}
+function		{return(FUNCTION_TOKEN);}
+return			{return(RETURN_TOKEN);}
+getint			{return(GETINT_TOKEN);}
+string			{return(STRING_TOKEN);}
+void			{return(VOID_TOKEN);}
+else			{return(ELSE_TOKEN);}
+then			{return(THEN_TOKEN);}
+let				{return(LET_TOKEN);}
+end				{return(END_TOKEN);}
+var				{return(VAR_TOKEN);}
+for				{return(FOR_TOKEN);}
+int				{return(INT_TOKEN);}
+in				{return(IN_TOKEN);}
+if				{return(IF_TOKEN);}
+do				{return(DO_TOKEN);}
+to				{return(TO_TOKEN);}
+{id}			{return(ID);}
+{number}		{return(NUMBER);}
+{string}		{return(STRING_LITERAL);}
+{comment}		{return(COMMENT);}
+:=				{return(ASSIGNMENT_TOKEN);}
+==				{return(EQUALITY_TOKEN);}
+:				{return(COLON_TOKEN);}
+=				{return(EQUAL_TOKEN);}
+\(				{return(LEFT_PARENTHESIS_TOKEN);}
+\)				{return(RIGHT_PARENTHESIS_TOKEN);}
+,				{return(COMMA_TOKEN);}
+;				{return(SEMI_COLON_TOKEN);}
+\+				{return(PLUS_TOKEN);}
+-				{return(MINUS_TOKEN);}
+\*				{return(MULTIPLY_TOKEN);}
+\/				{return(DIVISOR_TOKEN);}
+\<=				{return(LESS_EQUAL_TOKEN);}
+\<>				{return(NOT_EQUAL_TOKEN);}
+\<				{return(LESS_THAN_TOKEN);}
+>=				{return(GREATER_EQUAL_TOKEN);}
+>				{return(GREATER_THAN_TOKEN);}
 
 \r|\n|\r\n		{return(EOLN);}
 .				{;}
