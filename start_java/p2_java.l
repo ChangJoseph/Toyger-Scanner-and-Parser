@@ -39,9 +39,8 @@ public static int lookahead;
 public static String lookaheadStr;
 public static lexer lex = new lexer(new InputStreamReader(System.in));
 
-public static void start() {
-	lookahead = lex.yylex();
 
+public static void start() {
 	if (lookahead == 2) {
 		// match(token); nextState();
 	}
@@ -52,14 +51,87 @@ public static void start() {
 		syntax_error();
 	}
 }
+public static void decs() {
+
+}
+public static void dec() {
+
+}
+public static void var_dec() {
+
+}
+public static void var_dec_2() {
+
+}
+public static void type() {
+
+}
+public static void function_dec() {
+
+}
+public static void function_dec_2() {
+
+}
+public static void parameters() {
+
+}
+public static void parameters_2() {
+
+}
+public static void parameter() {
+
+}
+public static void statements() {
+
+}
+public static void statements_2() {
+
+}
+public static void statement() {
+
+}
+public static void statement_2() {
+
+}
+public static void statement_3() {
+
+}
+public static void statement_4() {
+
+}
+public static void expr() {
+
+}
+public static void expr_2() {
+
+}
+public static void term() {
+
+}
+public static void term_2() {
+
+}
+public static void factor() {
+
+}
+public static void factor_2() {
+
+}
+public static void expr_list() {
+
+}
+public static void expr_list_2() {
+
+}
+
+
 
 public static void main(String [] args) throws IOException {
+	lookahead = lex.yylex();
 	start();
-	if (lookahead == EOLN) {
-		return; // Accept state
-	}
-	else {
-		syntax_error();
+	while ((lookahead) != EOLN) {
+		
+		lookahead = lex.yylex();
 	}
 }
 
