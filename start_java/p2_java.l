@@ -103,7 +103,7 @@ public static void match(int symbol) throws IOException {
 	else syntax_error();
 }
 public static void globalVarAdd() {
-	globalVarAdd(lex.yytext(),lex.yyline); // TODO check if lex.* funcs work
+	globalVarAdd(lex.yytext(),lex.yyline+1); // TODO check if lex.* funcs work
 }
 public static void globalVarAdd(String v, int l) {
 	variable_list.add(new GlobalVariable(v,l));
@@ -188,7 +188,6 @@ public static void function_dec() throws IOException { // F
 	if (lookahead == FUNCTION_TOKEN) {
 		match(lookahead);
 		if (lookahead == ID) {
-			globalVarAdd();
 			match(lookahead);
 			if (lookahead == LEFT_PARENTHESIS_TOKEN) {
 				match(lookahead);
@@ -202,9 +201,9 @@ public static void function_dec() throws IOException { // F
 }
 public static void function_dec_2() throws IOException { // F`
 	if (lookahead == ID) {
-		globalVarAdd();
 		parameters(); // G
 		if (lookahead == RIGHT_PARENTHESIS_TOKEN) {
+			System.out.print("\nDEBUG BREAKPOINT 1\n"); // TODO
 			match(lookahead);
 			if (lookahead == COLON_TOKEN) {
 				match(lookahead);
@@ -212,7 +211,7 @@ public static void function_dec_2() throws IOException { // F`
 					type(); // E
 					if (lookahead == EQUAL_TOKEN) {
 						match(lookahead);
-						if (lookahead == ID) {
+						if (firstStatement()) {
 							statements(); // I
 							if (lookahead == END_TOKEN) {
 								match(lookahead);
@@ -230,20 +229,17 @@ public static void function_dec_2() throws IOException { // F`
 		else syntax_error();
 	}
 	else if (lookahead == RIGHT_PARENTHESIS_TOKEN) {
-		if (lookahead == RIGHT_PARENTHESIS_TOKEN) {
+		match(lookahead);
+		if (lookahead == COLON_TOKEN) {
 			match(lookahead);
-			if (lookahead == COLON_TOKEN) {
-				match(lookahead);
-				if (firstType()) {
-					type(); // E
-					if (lookahead == EQUAL_TOKEN) {
-						match(lookahead);
-						if (lookahead == ID) {
-							statements(); // I
-							if (lookahead == END_TOKEN) {
-								match(lookahead);
-							}
-							else syntax_error();
+			if (firstType()) {
+				type(); // E
+				if (lookahead == EQUAL_TOKEN) {
+					match(lookahead);
+					if (firstStatement()) {
+						statements(); // I
+						if (lookahead == END_TOKEN) {
+							match(lookahead);
 						}
 						else syntax_error();
 					}
@@ -256,37 +252,27 @@ public static void function_dec_2() throws IOException { // F`
 		else syntax_error();
 	}
 	else syntax_error();
-	parameters();
 }
 public static void parameters() throws IOException { // G
 	if (lookahead == ID) {
 		parameter(); // H
-		if (lookahead == SEMI_COLON_TOKEN) {
-			parameters_2(); // G`
-		}
-		else syntax_error();
+		parameters_2(); // G`
 	}
 	else syntax_error();
 }
 public static void parameters_2() throws IOException { // G`
-	if (lookahead == SEMI_COLON_TOKEN) {
+	if (lookahead == COMMA_TOKEN) {
 		match(lookahead);
 		if (lookahead == ID) {
 			parameter(); // H
-			if (lookahead == SEMI_COLON_TOKEN) {
-				parameters_2(); // G`
-			}
-			else syntax_error();
+			parameters_2(); // G`
 		}
 		else syntax_error();
 	}
-	else {
-		return; // epsilon
-	}
+	else return; // epsilon
 }
 public static void parameter() throws IOException { // H
 	if (lookahead == ID) {
-		globalVarAdd();
 		match(lookahead);
 		if (lookahead == COLON_TOKEN) {
 			match(lookahead);
@@ -300,32 +286,28 @@ public static void parameter() throws IOException { // H
 	else syntax_error();
 }
 public static void statements() throws IOException { // I
-	if (lookahead == ID) {
+	if (firstStatement()) {
 		statement(); // J
-		if (lookahead == SEMI_COLON_TOKEN) {
-			statements_2(); // I`
-		}
-		else syntax_error();
+		statements_2(); // I`
 	}
 	else syntax_error();
 }
 public static void statements_2() throws IOException { // I`
 	if (lookahead == SEMI_COLON_TOKEN) {
 		match(lookahead);
-		if (lookahead == ID) {
+		if (firstStatement()) {
 			statement(); // J
-			if (lookahead == SEMI_COLON_TOKEN) {
-				statements_2(); // I`
-			}
-			else syntax_error();
+			statements_2(); // I`
 		}
 		else syntax_error();
 	}
 	else return; // epsilon
 }
+public static boolean firstStatement() {
+	return (lookahead == ID || lookahead == RETURN_TOKEN || lookahead == PRINTINT_TOKEN || lookahead == PRINTSTRING_TOKEN);
+}
 public static void statement() throws IOException { // J
 	if (lookahead == ID) {
-		globalVarAdd();
 		match(lookahead);
 		if (lookahead == ASSIGNMENT_TOKEN) {
 			match(lookahead);
@@ -540,18 +522,19 @@ public static void main(String [] args) throws IOException {
 		syntax_error();
 	}
 	for (GlobalVariable var_elem : variable_list) {
-		System.out.printf("Global Variable %s: line %i\n",var_elem.var_id,var_elem.line_num);
+		System.out.printf("Global Variable %s: line %d\n",var_elem.var_id,var_elem.line_num);
 	}
-	System.out.printf("\nNumber of functions defined: %i\n",num_functions)
-	System.out.printf("Number of comments: %i\n",num_comments)
-	System.out.printf("Number of strings: %i\n",num_strings)
+	System.out.printf("\nNumber of functions defined: %d\n",num_functions);
+	System.out.printf("Number of comments: %d\n",num_comments);
+	System.out.printf("Number of strings: %d\n",num_strings);
 
-	System.out.println("DEBUG: number spaces: " + num_spaces);
+	System.out.println("\n\nDEBUG: number spaces: " + num_spaces);
 	System.out.println("DEBUG: number skips: " + num_skips);
 }
 
 public static void syntax_error() {
-	System.err.printf(lexical_err_msg,lex.yyline);
+	System.err.printf(lexical_err_msg,lex.yyline+1);
+	System.err.printf("COLUMN: %d",lex.yycolumn);
 	System.exit(1);
 }
 
@@ -566,7 +549,7 @@ public static void syntax_error() {
 // keyword = let|in|end|var|function|printint|printstring|getint|return|if|then|else|for|to|do|int|string|void
 // punctuation = \(|\)|:|,|=|;
 // operator = :=|\+|-|\*|\/|==|<|<=|>|>=|<>
-id = [A-Za-z0-9][_A-Za-z0-9]
+id = [A-Za-z0-9][_A-Za-z0-9]*
 number = [1-9][0-9]*
 string = \"((\\\")|[^\n\"])*\"
 comment = \/\/[^\n]*
@@ -613,7 +596,7 @@ to				{return(TO_TOKEN);}
 >=				{return(GREATER_EQUAL_TOKEN);}
 >				{return(GREATER_THAN_TOKEN);}
 
-\r|\n|\r\n		{return(EOLN);}
+\r|\n|\r\n		{/*return(EOLN)*/;}
 " "				{num_spaces++;}
 .				{num_skips++;}
 
