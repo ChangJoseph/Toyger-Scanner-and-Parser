@@ -200,7 +200,7 @@ public static void function_dec() throws IOException { // F
 public static void function_dec_2() throws IOException { // F`
 	if (lookahead == ID) {
 		globalVarAdd();
-		match(lookahead);
+		parameters() // G
 		if (lookahead == RIGHT_PARENTHESIS_TOKEN) {
 			match(lookahead);
 			if (lookahead == COLON_TOKEN) {
