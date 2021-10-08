@@ -345,10 +345,7 @@ public static void statement() throws IOException { // J
 	}
 	else if (lookahead == RETURN_TOKEN) {
 		match(lookahead);
-		if (firstFactor()) {
-			statement_4(); // J```
-		}
-		else return;
+		statement_4(); // J```
 	}
 	else if (lookahead == PRINTINT_TOKEN) {
 		match(lookahead);
@@ -419,31 +416,116 @@ public static void statement_4() throws IOException { // J```
 	else return; // epsilon
 }
 public static void expr() throws IOException { // K
-
+	if (firstFactor()) {
+		term(); // L
+		expr_2(); // K`
+	}
+	else syntax_error();
 }
 public static void expr_2() throws IOException { // K`
-
+	if (lookahead == PLUS_TOKEN) {
+		match(lookahead);
+		if (firstFactor()) {
+			term(); // L
+			expr_2(); // K`
+		}
+		else syntax_error();
+	}
+	else if (lookahead == MINUS_TOKEN) {
+		match(lookahead);
+		if (firstFactor()) {
+			term(); // L
+			expr_2(); // K`
+		}
+		else syntax_error();
+	}
+	else return; // epsilon
 }
 public static void term() throws IOException { // L
-
+	if (firstFactor()) {
+		factor(); // M
+		term_2(); // L`
+	}
+	else syntax_error();
 }
 public static void term_2() throws IOException { // L`
-
+	if (lookahead == MULTIPLY_TOKEN) {
+		match(lookahead);
+		if (firstFactor()) {
+			factor(); // M
+			term_2(); // L`
+		}
+	}
+	if (lookahead == DIVISOR_TOKEN) {
+		match(lookahead);
+		if (firstFactor()) {
+			factor(); // M
+			term_2(); // L`
+		}
+	}
+	else return; // epsilon
 }
-public static boolean firstFactor() { // first(M)
+public static boolean firstFactor() { // first(M) -> first non-terminals associated with state M
 	return (lookahead == LEFT_PARENTHESIS_TOKEN || lookahead == NUMBER || lookahead == STRING_LITERAL || lookahead == ID);
 }
 public static void factor() throws IOException { // M
-
+	if (lookahead == LEFT_PARENTHESIS_TOKEN) {
+		match(lookahead);
+		if (firstFactor()) {
+			expr(); // K
+			if (lookahead == RIGHT_PARENTHESIS_TOKEN) {
+				match(lookahead);
+			}
+			else syntax_error();
+		}
+		else syntax_error();
+	}
+	else if (lookahead == NUMBER) {
+		match(lookahead);
+	}
+	else if (lookahead == STRING_LITERAL) {
+		match(lookahead);
+	}
+	else if (lookahead == ID) {
+		match(lookahead);
+		factor_2(); // M`
+	}
+	else syntax_error();
 }
 public static void factor_2() throws IOException { // M`
-
+	if (lookahead == LEFT_PARENTHESIS_TOKEN) {
+		match(lookahead);
+		if (lookahead == RIGHT_PARENTHESIS_TOKEN) {
+			match(lookahead);
+		}
+		else if (firstFactor()) {
+			expr_list(); // N
+			if (lookahead == RIGHT_PARENTHESIS_TOKEN) {
+				match(lookahead);
+			}
+			else syntax_error();
+		}
+		else syntax_error();
+	}
+	else return; // epsilon
 }
 public static void expr_list() throws IOException { // N
-
+	if (firstFactor()) {
+		expr(); // K
+		expr_list_2(); // N`
+	}
+	else syntax_error();
 }
 public static void expr_list_2() throws IOException { // N`
-
+	if (lookahead == COMMA_TOKEN) {
+		match(lookahead);
+		if (firstFactor()) {
+			expr(); // K
+			expr_list_2(); // N`
+		}
+		else syntax_error();
+	}
+	else return; // epsilon
 }
 
 
