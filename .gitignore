@@ -1,7 +1,6 @@
 **/.vs
 ./cs440_p2.pdf
 **/*.class
-**/*.java
 **/*.java~
 **/*old*
 **/*.docx

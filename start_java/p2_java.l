@@ -1,5 +1,9 @@
-import java.io.*; 
-import java.util.ArrayList;
+ /* CS440 Proj 2 Fall 2021
+      Name: Joseph Chang
+      G#: G01189913
+      Language: Java
+  */
+import java.io.*;
 
  /* lex comments: cannot start with the leftmost location of a line */
  /* addtional imports/ declarations here */
@@ -70,472 +74,25 @@ static final int COMMENT=40; /* // comment */
 /* End of line */
 static final int EOLN=100;
 
+static int num_functions=0;
+static int num_comments=0;
+static int num_strings=0;
+
 /* additional definitions here */
-public static int lookahead;
-public static lexer lex = new lexer(new InputStreamReader(System.in));
-
-/* Program Report variables */
-public static ArrayList<GlobalVariable> variable_list = new ArrayList<GlobalVariable>();
-public static int num_functions=0;
-public static int num_comments=0;
-public static int num_strings=0;
-/* Extra debug variables */
-public static int num_spaces=0;
-public static int num_skips=0;
-
-public static class GlobalVariable {
-	public String var_id;
-	public int line_num;
-	public GlobalVariable(String v, int l) {
-		var_id = v;
-		line_num = l;
-	}
+private void lexical_error() {
+	System.err.printf(lexical_err_msg,yyline+1);
 }
-
-public static int look() throws IOException {
-	lookahead = lex.yylex();
-	return lookahead;
+public int get_function_count() {
+	return num_functions;
 }
-public static void match(int symbol) throws IOException {
-	if (lookahead == symbol) {
-		look();
-	}
-	else syntax_error();
+public int get_comment_count() {
+	return num_comments;
 }
-public static void globalVarAdd() {
-	globalVarAdd(lex.yytext(),lex.yyline+1); // TODO check if lex.* funcs work
+public int get_string_count() {
+	return num_strings;
 }
-public static void globalVarAdd(String v, int l) {
-	variable_list.add(new GlobalVariable(v,l));
-}
-
-public static void start() throws IOException {
-	if (lookahead == LET_TOKEN) {
-		match(lookahead);
-		decs(); // B
-		// in
-		if (lookahead == IN_TOKEN) {
-			match(lookahead);
-		}
-		else syntax_error();
-		statements(); // I
-		// end
-		if (lookahead == END_TOKEN) {
-			match(lookahead);
-		}
-		else syntax_error();
-	}
-	else syntax_error();
-}
-public static void decs() throws IOException { // B
-	if (lookahead == VAR_TOKEN || lookahead == FUNCTION_TOKEN) {
-		dec(); // C
-		decs(); // B
-	}
-	// else if (lookahead == EOLN) {
-	// 	match(lookahead);
-	// }
-	else return; // epsilon
-}
-public static void dec() throws IOException { // C
-	if (lookahead == VAR_TOKEN) {
-		var_dec(); // D
-	}
-	else if (lookahead == FUNCTION_TOKEN) {
-		function_dec(); // F
-	}
-	else syntax_error();
-}
-public static void var_dec() throws IOException { // D
-	if (lookahead == VAR_TOKEN) {
-		match(lookahead);
-		if (lookahead == ID) {
-			globalVarAdd();
-			match(lookahead);
-			if (lookahead == ASSIGNMENT_TOKEN) {
-				var_dec_2(); // D`
-			}
-			else if (lookahead == COLON_TOKEN) {
-				var_dec_2(); // D`
-			}
-			else syntax_error();
-		}
-		else syntax_error();
-	}
-	else syntax_error();
-}
-public static void var_dec_2() throws IOException { // D`
-	if (lookahead == ASSIGNMENT_TOKEN) {
-		match(lookahead);
-		expr(); // K
-	}
-	else if (lookahead == COLON_TOKEN) {
-		match(lookahead);
-		type(); // E
-	}
-	else syntax_error();
-}
-public static boolean firstType() { // first(E)
-	return (lookahead == INT_TOKEN || lookahead == STRING_TOKEN || lookahead == VOID_TOKEN);
-}
-public static void type() throws IOException { // E
-	if (firstType()) {
-		match(lookahead);
-	}
-	else syntax_error();
-}
-public static void function_dec() throws IOException { // F
-	if (lookahead == FUNCTION_TOKEN) {
-		match(lookahead);
-		if (lookahead == ID) {
-			match(lookahead);
-			if (lookahead == LEFT_PARENTHESIS_TOKEN) {
-				match(lookahead);
-				function_dec_2();
-			}
-			else syntax_error();
-		}
-		else syntax_error();
-	}
-	else syntax_error();
-}
-public static void function_dec_2() throws IOException { // F`
-	if (lookahead == ID) {
-		parameters(); // G
-		if (lookahead == RIGHT_PARENTHESIS_TOKEN) {
-			match(lookahead);
-			if (lookahead == COLON_TOKEN) {
-				match(lookahead);
-				if (firstType()) {
-					type(); // E
-					if (lookahead == EQUAL_TOKEN) {
-						match(lookahead);
-						if (firstStatement()) {
-							statements(); // I
-							if (lookahead == END_TOKEN) {
-								match(lookahead);
-							}
-							else syntax_error();
-						}
-						else syntax_error();
-					}
-					else syntax_error();
-				}
-				else syntax_error();
-			}
-			else syntax_error();
-		}
-		else syntax_error();
-	}
-	else if (lookahead == RIGHT_PARENTHESIS_TOKEN) {
-		match(lookahead);
-		if (lookahead == COLON_TOKEN) {
-			match(lookahead);
-			if (firstType()) {
-				type(); // E
-				if (lookahead == EQUAL_TOKEN) {
-					match(lookahead);
-					if (firstStatement()) {
-						statements(); // I
-						if (lookahead == END_TOKEN) {
-							match(lookahead);
-						}
-						else syntax_error();
-					}
-					else syntax_error();
-				}
-				else syntax_error();
-			}
-			else syntax_error();
-		}
-		else syntax_error();
-	}
-	else syntax_error();
-}
-public static void parameters() throws IOException { // G
-	if (lookahead == ID) {
-		parameter(); // H
-		parameters_2(); // G`
-	}
-	else syntax_error();
-}
-public static void parameters_2() throws IOException { // G`
-	if (lookahead == COMMA_TOKEN) {
-		match(lookahead);
-		if (lookahead == ID) {
-			parameter(); // H
-			parameters_2(); // G`
-		}
-		else syntax_error();
-	}
-	else return; // epsilon
-}
-public static void parameter() throws IOException { // H
-	if (lookahead == ID) {
-		match(lookahead);
-		if (lookahead == COLON_TOKEN) {
-			match(lookahead);
-			if (firstType()) {
-				type(); // E
-			}
-			else syntax_error();
-		}
-		else syntax_error();
-	}
-	else syntax_error();
-}
-public static void statements() throws IOException { // I
-	if (firstStatement()) {
-		statement(); // J
-		statements_2(); // I`
-	}
-	else syntax_error();
-}
-public static void statements_2() throws IOException { // I`
-	if (lookahead == SEMI_COLON_TOKEN) {
-		match(lookahead);
-		if (firstStatement()) {
-			statement(); // J
-			statements_2(); // I`
-		}
-		else syntax_error();
-	}
-	else return; // epsilon
-}
-public static boolean firstStatement() {
-	return (lookahead == ID || lookahead == RETURN_TOKEN || lookahead == PRINTINT_TOKEN || lookahead == PRINTSTRING_TOKEN);
-}
-public static void statement() throws IOException { // J
-	if (lookahead == ID) {
-		match(lookahead);
-		if (lookahead == ASSIGNMENT_TOKEN) {
-			match(lookahead);
-			if (firstFactor() || lookahead == GETINT_TOKEN) {
-				statement_2(); // J`
-			}
-			else syntax_error();
-		}
-		else if (lookahead == LEFT_PARENTHESIS_TOKEN) {
-			match(lookahead);
-			if (lookahead == RIGHT_PARENTHESIS_TOKEN || firstFactor()) {
-				statement_3(); // J``
-			}
-			else syntax_error();
-		}
-		else syntax_error();
-	}
-	else if (lookahead == RETURN_TOKEN) {
-		match(lookahead);
-		statement_4(); // J```
-	}
-	else if (lookahead == PRINTINT_TOKEN) {
-		match(lookahead);
-		if (lookahead == LEFT_PARENTHESIS_TOKEN) {
-			match(lookahead);
-			if (firstFactor()) {
-				expr(); // K
-				if (lookahead == RIGHT_PARENTHESIS_TOKEN) {
-					match(lookahead);
-				}
-				else syntax_error();
-			}
-			else syntax_error();
-		}
-		else syntax_error();
-	}
-	else if (lookahead == PRINTSTRING_TOKEN) {
-		match(lookahead);
-		if (lookahead == LEFT_PARENTHESIS_TOKEN) {
-			match(lookahead);
-			if (firstFactor()) {
-				expr(); // K
-				if (lookahead == RIGHT_PARENTHESIS_TOKEN) {
-					match(lookahead);
-				}
-				else syntax_error();
-			}
-			else syntax_error();
-		}
-		else syntax_error();
-	}
-	else syntax_error();
-}
-public static void statement_2() throws IOException { // J`
-	if (lookahead == GETINT_TOKEN) {
-		match(lookahead);
-		if (lookahead == LEFT_PARENTHESIS_TOKEN) {
-			match(lookahead);
-			if (lookahead == RIGHT_PARENTHESIS_TOKEN) {
-				match(lookahead);
-			}
-			else syntax_error();
-		}
-		else syntax_error();
-	}
-	else if (firstFactor()) {
-		expr(); // K
-	}
-	else syntax_error();
-}
-public static void statement_3() throws IOException { // J``
-	if (lookahead == RIGHT_PARENTHESIS_TOKEN) {
-		match(lookahead);
-	}
-	else if (firstFactor()) {
-		expr_list(); // N
-		if (lookahead == RIGHT_PARENTHESIS_TOKEN) {
-			match(lookahead);
-		}
-		else syntax_error();
-	}
-	else syntax_error();
-}
-public static void statement_4() throws IOException { // J```
-	if (firstFactor()) {
-		expr(); // K
-	}
-	else return; // epsilon
-}
-public static void expr() throws IOException { // K
-	if (firstFactor()) {
-		term(); // L
-		expr_2(); // K`
-	}
-	else syntax_error();
-}
-public static void expr_2() throws IOException { // K`
-	if (lookahead == PLUS_TOKEN) {
-		match(lookahead);
-		if (firstFactor()) {
-			term(); // L
-			expr_2(); // K`
-		}
-		else syntax_error();
-	}
-	else if (lookahead == MINUS_TOKEN) {
-		match(lookahead);
-		if (firstFactor()) {
-			term(); // L
-			expr_2(); // K`
-		}
-		else syntax_error();
-	}
-	else return; // epsilon
-}
-public static void term() throws IOException { // L
-	if (firstFactor()) {
-		factor(); // M
-		term_2(); // L`
-	}
-	else syntax_error();
-}
-public static void term_2() throws IOException { // L`
-	if (lookahead == MULTIPLY_TOKEN) {
-		match(lookahead);
-		if (firstFactor()) {
-			factor(); // M
-			term_2(); // L`
-		}
-	}
-	if (lookahead == DIVISOR_TOKEN) {
-		match(lookahead);
-		if (firstFactor()) {
-			factor(); // M
-			term_2(); // L`
-		}
-	}
-	else return; // epsilon
-}
-public static boolean firstFactor() { // first(M) -> first non-terminals associated with state M
-	return (lookahead == LEFT_PARENTHESIS_TOKEN || lookahead == NUMBER || lookahead == STRING_LITERAL || lookahead == ID);
-}
-public static void factor() throws IOException { // M
-	if (lookahead == LEFT_PARENTHESIS_TOKEN) {
-		match(lookahead);
-		if (firstFactor()) {
-			expr(); // K
-			if (lookahead == RIGHT_PARENTHESIS_TOKEN) {
-				match(lookahead);
-			}
-			else syntax_error();
-		}
-		else syntax_error();
-	}
-	else if (lookahead == NUMBER) {
-		match(lookahead);
-	}
-	else if (lookahead == STRING_LITERAL) {
-		match(lookahead);
-	}
-	else if (lookahead == ID) {
-		match(lookahead);
-		factor_2(); // M`
-	}
-	else syntax_error();
-}
-public static void factor_2() throws IOException { // M`
-	if (lookahead == LEFT_PARENTHESIS_TOKEN) {
-		match(lookahead);
-		if (lookahead == RIGHT_PARENTHESIS_TOKEN) {
-			match(lookahead);
-		}
-		else if (firstFactor()) {
-			expr_list(); // N
-			if (lookahead == RIGHT_PARENTHESIS_TOKEN) {
-				match(lookahead);
-			}
-			else syntax_error();
-		}
-		else syntax_error();
-	}
-	else return; // epsilon
-}
-public static void expr_list() throws IOException { // N
-	if (firstFactor()) {
-		expr(); // K
-		expr_list_2(); // N`
-	}
-	else syntax_error();
-}
-public static void expr_list_2() throws IOException { // N`
-	if (lookahead == COMMA_TOKEN) {
-		match(lookahead);
-		if (firstFactor()) {
-			expr(); // K
-			expr_list_2(); // N`
-		}
-		else syntax_error();
-	}
-	else return; // epsilon
-}
-
-
-
-public static void main(String [] args) throws IOException {
-	look();
-	start();
-	if (lookahead == EOF) {
-		System.err.println("Input Accepted");
-	}
-	else {
-		syntax_error();
-	}
-	for (GlobalVariable var_elem : variable_list) {
-		System.out.printf("Global Variable %s: line %d\n",var_elem.var_id,var_elem.line_num);
-	}
-	if (variable_list.size() > 0) System.out.print("\n");
-	System.out.printf("Number of functions defined: %d\n",num_functions);
-	System.out.printf("Number of comments: %d\n",num_comments);
-	System.out.printf("Number of strings: %d\n",num_strings);
-
-	// System.out.println("\n\nDEBUG: number spaces: " + num_spaces);
-	// System.out.println("DEBUG: number skips: " + num_skips);
-}
-
-public static void syntax_error() {
-	System.err.printf(lexical_err_msg,lex.yyline+1);
-	// System.err.printf("COLUMN: %d",lex.yycolumn);
-	System.exit(1);
+public int get_line() {
+	return yyline+1;
 }
 
 %} 
@@ -545,11 +102,10 @@ public static void syntax_error() {
  /* lex comments: cannot start with the leftmost location of a line */
  /* add your regular definitions here */
 
- /* TODO check regex */
 // keyword = let|in|end|var|function|printint|printstring|getint|return|if|then|else|for|to|do|int|string|void
 // punctuation = \(|\)|:|,|=|;
 // operator = :=|\+|-|\*|\/|==|<|<=|>|>=|<>
-id = [A-Za-z0-9][_A-Za-z0-9]*
+id = [A-Za-z][_A-Za-z0-9]*
 number = [1-9][0-9]*
 string = \"((\\\")|[^\n\"])*\"
 comment = \/\/[^\n]*
@@ -597,8 +153,8 @@ to				{return(TO_TOKEN);}
 >				{return(GREATER_THAN_TOKEN);}
 
 \r|\n|\r\n		{/*return(EOLN)*/;}
-" "				{num_spaces++;}
-.				{num_skips++;}
+" "				{;}
+.				{lexical_error();}
 
  
 	/* copy from input to output */
