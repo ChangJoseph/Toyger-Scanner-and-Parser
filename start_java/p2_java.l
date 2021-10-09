@@ -81,6 +81,7 @@ static int num_strings=0;
 /* additional definitions here */
 private void lexical_error() {
 	System.err.printf(lexical_err_msg,yyline+1);
+	System.exit(1);
 }
 public int get_function_count() {
 	return num_functions;
