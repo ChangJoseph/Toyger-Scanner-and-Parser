@@ -1,6 +1,5 @@
- /* CS440 Proj 1 Fall 2021
+ /* Lang Processing Proj 1 Fall 2021
       Name: Joseph Chang
-      G#: G01189913
       Language: Java
 
       Note:	added %line to us yyline for keeping track of current lex line number
